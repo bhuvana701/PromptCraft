@@ -1,5 +1,4 @@
 
-
 import streamlit as st
 import re
 import html
@@ -397,6 +396,8 @@ elif menu == "Prompt Generator":
                     "Using the local generator instead."
                 )
 
+                st.error(f"Gemini Generator Error: {e}")
+
                 result = generate_prompt(topic, category, tone)
 
             st.session_state["generator_result"] = result
@@ -448,12 +449,14 @@ elif menu == "Prompt Analyzer":
                 st.session_state["analyzer_result"] = result
                 st.session_state["analyzer_local"] = False
 
-            except Exception:
+            except Exception as e:
 
                 st.warning(
                     "Gemini AI is unavailable. "
                     "Using the local analyzer instead."
                 )
+
+                st.error(f"Gemini Analyzer Error: {e}")
 
                 result = analyze_prompt(prompt)
 
@@ -531,10 +534,11 @@ elif menu == "Prompt Improver":
 
                 st.success("Prompt improved successfully!")
 
-            except Exception:
+            except Exception as e:
+
+                st.error(f"Gemini Improver Error: {e}")
 
                 st.warning(
-                    "Gemini AI is unavailable. "
                     "Using the local improver instead."
                 )
 
