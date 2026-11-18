@@ -25,12 +25,13 @@ from modules.history import (
 st.set_page_config(
     page_title="PromptCraft",
     page_icon="✨",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
 
 # --------------------------------------------------
-# PROMPT HISTORY DATABASE CONFIGURATION
+# DATABASE CONFIGURATION
 # --------------------------------------------------
 
 initialize_database()
@@ -48,18 +49,37 @@ HISTORY_SESSION_ID = st.session_state["history_session_id"]
 st.markdown("""
 <style>
 
+/* Main application */
+
 .stApp {
     background-color: #F5F6FC;
     color: #252545;
 }
 
 .main .block-container {
+    max-width: 1150px;
     padding-top: 2rem;
-    padding-bottom: 2rem;
+    padding-bottom: 3rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
 }
+
+/* Typography */
 
 h1, h2, h3, h4, p, li, label {
     color: #252545;
+}
+
+h1 {
+    font-weight: 750;
+}
+
+h2 {
+    font-weight: 700;
+}
+
+h3 {
+    font-weight: 650;
 }
 
 /* Sidebar */
@@ -72,15 +92,23 @@ h1, h2, h3, h4, p, li, label {
     color: #FFFFFF !important;
 }
 
-/* Main action buttons */
+/* Sidebar navigation */
+
+[data-testid="stSidebar"] [role="radiogroup"] {
+    gap: 10px;
+}
+
+/* Main buttons */
 
 .stButton > button {
     background: linear-gradient(90deg, #7055DC, #9276F5);
     color: white !important;
     border: none;
     border-radius: 10px;
-    padding: 0.55rem 1.2rem;
+    padding: 0.65rem 1.2rem;
     font-weight: 600;
+    min-height: 43px;
+    transition: 0.2s;
 }
 
 .stButton > button:hover {
@@ -89,45 +117,58 @@ h1, h2, h3, h4, p, li, label {
     border: none;
 }
 
-/* Download button */
+/* Download buttons */
 
 .stDownloadButton > button {
     background: linear-gradient(90deg, #008F83, #16B8A5);
     color: white !important;
     border: none;
     border-radius: 10px;
-    padding: 0.55rem 1.2rem;
+    padding: 0.65rem 1.2rem;
     font-weight: 600;
+    min-height: 43px;
 }
 
 .stDownloadButton > button:hover {
     background: #00766C;
     color: white !important;
-    border: none;
 }
 
-/* Input fields */
+/* Inputs */
 
 .stTextInput input,
 .stTextArea textarea,
 .stSelectbox div[data-baseweb="select"] {
-    background-color: white;
+    background-color: #FFFFFF;
     color: #252545;
-    border-radius: 8px;
+    border-radius: 9px;
+}
+
+.stTextArea textarea {
+    border: 1px solid #DDD8F0;
+    line-height: 1.6;
+}
+
+/* Input focus */
+
+.stTextArea textarea:focus,
+.stTextInput input:focus {
+    border-color: #7055DC;
+    box-shadow: 0 0 0 1px #7055DC;
 }
 
 /* Feature cards */
 
 .feature-card {
-    background-color: white;
+    background-color: #FFFFFF;
     border: 1px solid #E5E2F5;
     border-radius: 15px;
-    padding: 22px;
-    min-height: 155px;
+    padding: 23px;
+    min-height: 165px;
     box-shadow: 0 3px 12px rgba(40, 30, 90, 0.06);
 }
 
-/* Home hero section */
+/* Hero section */
 
 .hero {
     background: linear-gradient(120deg, #6046C7, #987AF2);
@@ -137,16 +178,17 @@ h1, h2, h3, h4, p, li, label {
 }
 
 .hero h1 {
-    color: white !important;
+    color: #FFFFFF !important;
     font-size: 38px;
 }
 
 .hero p {
     color: #EEE9FF !important;
     font-size: 17px;
+    line-height: 1.7;
 }
 
-/* Result box */
+/* Result cards - COMPACT PROFESSIONAL DESIGN */
 
 .result-box {
     background-color: #FFFFFF;
@@ -154,31 +196,61 @@ h1, h2, h3, h4, p, li, label {
     border: 1px solid #DDD8F0;
     border-left: 5px solid #7055DC;
     border-radius: 12px;
-    padding: 22px;
-    line-height: 1.7;
-    font-size: 15px;
+    padding: 15px 18px;
+    line-height: 1.45;
+    font-size: 14px;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
     box-shadow: 0 3px 12px rgba(40, 30, 90, 0.05);
+    width: 100%;
+    margin: 0;
 }
 
-/* Success message */
+/* Analyzer score */
+
+[data-testid="stMetric"] {
+    background: #FFFFFF;
+    border: 1px solid #E5E2F5;
+    border-radius: 13px;
+    padding: 18px;
+    box-shadow: 0 3px 12px rgba(40, 30, 90, 0.05);
+}
+
+/* Expander */
+
+[data-testid="stExpander"] {
+    background: #FFFFFF;
+    border: 1px solid #E5E2F5;
+    border-radius: 12px;
+    margin-bottom: 12px;
+}
+
+/* General alerts */
 
 [data-testid="stAlert"] {
-    background-color: #14532D !important;
-    border: 1px solid #166534 !important;
     border-radius: 10px !important;
 }
+
+/* General alert text */
 
 [data-testid="stAlert"] p,
 [data-testid="stAlert"] div,
 [data-testid="stAlert"] span {
-    color: #DCFCE7 !important;
+    color: #252545;
 }
 
-[data-testid="stAlert"] svg {
-    color: #86EFAC !important;
-    fill: #86EFAC !important;
+/* SUCCESS NOTIFICATION - PURPLE BACKGROUND + WHITE TEXT */
+
+div[data-testid="stAlert"]:has([data-testid="stAlertContentSuccess"]) {
+    background-color: #7055DC !important;
+    border: 1px solid #5940BD !important;
+    border-radius: 10px !important;
+}
+
+div[data-testid="stAlert"]:has([data-testid="stAlertContentSuccess"]) p,
+div[data-testid="stAlert"]:has([data-testid="stAlertContentSuccess"]) span,
+div[data-testid="stAlert"]:has([data-testid="stAlertContentSuccess"]) div {
+    color: #FFFFFF !important;
 }
 
 /* Footer */
@@ -186,7 +258,27 @@ h1, h2, h3, h4, p, li, label {
 .footer {
     text-align: center;
     color: #555575;
-    padding: 20px;
+    padding: 25px;
+    line-height: 1.8;
+}
+
+/* Mobile alignment */
+
+@media (max-width: 768px) {
+
+    .main .block-container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .hero {
+        padding: 23px;
+    }
+
+    .hero h1 {
+        font-size: 28px;
+    }
+
 }
 
 </style>
@@ -222,6 +314,35 @@ def get_ai_response(
     )
 
 
+def friendly_gemini_message(error, feature):
+
+    error_text = str(error).lower()
+
+    if "503" in error_text or "unavailable" in error_text:
+        st.info(
+            f"Gemini AI is temporarily experiencing high demand. "
+            f"Your {feature} will continue using the built-in local feature."
+        )
+
+    elif "429" in error_text or "resource_exhausted" in error_text:
+        st.info(
+            "Gemini AI request limit reached temporarily. "
+            "Using the built-in local feature instead."
+        )
+
+    elif "api key" in error_text or "unauthenticated" in error_text:
+        st.warning(
+            "Gemini AI could not authenticate the request. "
+            "Please check the API configuration."
+        )
+
+    else:
+        st.info(
+            f"Gemini AI is temporarily unavailable. "
+            f"Using the built-in {feature} instead."
+        )
+
+
 # --------------------------------------------------
 # RESULT DISPLAY FUNCTION
 # --------------------------------------------------
@@ -230,20 +351,28 @@ def display_result(result, filename):
 
     st.markdown("### ✨ Your Result")
 
-    safe_result = html.escape(str(result))
+    formatted_result = str(result)
 
-    st.markdown(
-        f'<div class="result-box">{safe_result}</div>',
-        unsafe_allow_html=True
+    # Add extra spacing between Evaluation Matrix heading
+    # and the table below it.
+
+    formatted_result = re.sub(
+        r"(###\s+Evaluation Matrix\s*\n)(\s*\|)",
+        r"\1\n\2",
+        formatted_result,
+        flags=re.IGNORECASE
     )
 
-    st.write("")
+    # Render Markdown formatting properly.
+
+    with st.container(border=True):
+        st.markdown(formatted_result)
 
     st.download_button(
         label="⬇️ Download Result",
         data=str(result),
         file_name=filename,
-        mime="text/plain"
+        mime="text/markdown"
     )
 
 
@@ -266,7 +395,7 @@ st.divider()
 
 
 # --------------------------------------------------
-# SIDEBAR NAVIGATION
+# SIDEBAR
 # --------------------------------------------------
 
 st.sidebar.title("✨ PromptCraft")
@@ -379,13 +508,16 @@ elif menu == "Prompt Generator":
         "structured and effective AI prompts."
     )
 
+    st.divider()
+
     topic = st.text_area(
         "Enter your idea or topic",
         placeholder="Example: Create a study plan for Python beginners",
-        height=130
+        height=140,
+        key="generator_topic"
     )
 
-    col1, col2 = st.columns(2)
+    col1, col2 = st.columns(2, gap="large")
 
     with col1:
         category = st.selectbox(
@@ -398,7 +530,8 @@ elif menu == "Prompt Generator":
                 "Image Generation",
                 "Marketing",
                 "General"
-            ]
+            ],
+            key="generator_category"
         )
 
     with col2:
@@ -409,10 +542,13 @@ elif menu == "Prompt Generator":
                 "Simple",
                 "Creative",
                 "Friendly"
-            ]
+            ],
+            key="generator_tone"
         )
 
-    if st.button("🚀 Generate Prompt"):
+    st.write("")
+
+    if st.button("🚀 Generate Prompt", use_container_width=True):
 
         if not topic.strip():
             st.warning("Please enter your idea first.")
@@ -432,12 +568,7 @@ elif menu == "Prompt Generator":
 
             except Exception as e:
 
-                st.warning(
-                    "Gemini AI is unavailable. "
-                    "Using the local generator instead."
-                )
-
-                st.error(f"Gemini Generator Error: {e}")
+                friendly_gemini_message(e, "generator")
 
                 result = generate_prompt(topic, category, tone)
 
@@ -475,15 +606,21 @@ elif menu == "Prompt Analyzer":
         "its quality, clarity and effectiveness."
     )
 
+    st.divider()
+
     prompt = st.text_area(
         "Enter your prompt",
         placeholder="Example: Explain Python.",
-        height=180
+        height=180,
+        key="analyzer_prompt"
     )
 
-    if st.button("🔍 Analyze Prompt"):
+    st.write("")
+
+    if st.button("🔍 Analyze Prompt", use_container_width=True):
 
         if not prompt.strip():
+
             st.warning("Please enter a prompt to analyze.")
 
         else:
@@ -496,19 +633,14 @@ elif menu == "Prompt Analyzer":
                         "analyze"
                     )
 
-                st.success("Prompt analysis completed!")
-
                 st.session_state["analyzer_result"] = result
                 st.session_state["analyzer_local"] = False
 
+                st.success("Prompt analysis completed!")
+
             except Exception as e:
 
-                st.warning(
-                    "Gemini AI is unavailable. "
-                    "Using the local analyzer instead."
-                )
-
-                st.error(f"Gemini Analyzer Error: {e}")
+                friendly_gemini_message(e, "analyzer")
 
                 result = analyze_prompt(prompt)
 
@@ -528,19 +660,30 @@ elif menu == "Prompt Analyzer":
 
         result = st.session_state["analyzer_result"]
 
+        st.divider()
+
+        st.subheader("📊 Analysis Results")
+
         if st.session_state.get("analyzer_local"):
 
-            st.metric(
-                "Prompt Quality Score",
-                f"{result['score']}/100"
-            )
+            score_col, level_col = st.columns(2, gap="large")
 
-            st.subheader(result["level"])
+            with score_col:
+                st.metric(
+                    "Prompt Quality Score",
+                    f"{result['score']}/100"
+                )
 
-            st.markdown("### Improvement Suggestions")
+            with level_col:
+                st.metric(
+                    "Quality Level",
+                    result["level"]
+                )
+
+            st.markdown("### 💡 Improvement Suggestions")
 
             for suggestion in result["suggestions"]:
-                st.write("•", suggestion)
+                st.markdown(f"- {suggestion}")
 
             display_result(result, "prompt_analysis.txt")
 
@@ -553,8 +696,13 @@ elif menu == "Prompt Analyzer":
             )
 
             if score_match:
+
                 score = min(int(score_match.group(1)), 100)
-                st.metric("Prompt Quality Score", f"{score}/100")
+
+                st.metric(
+                    "Prompt Quality Score",
+                    f"{score}/100"
+                )
 
             display_result(result, "prompt_analysis.txt")
 
@@ -572,15 +720,21 @@ elif menu == "Prompt Improver":
         "clearer, more specific and effective."
     )
 
+    st.divider()
+
     prompt = st.text_area(
         "Enter your existing prompt",
         placeholder="Example: Write about artificial intelligence.",
-        height=180
+        height=180,
+        key="improver_prompt"
     )
 
-    if st.button("✨ Improve Prompt"):
+    st.write("")
+
+    if st.button("✨ Improve Prompt", use_container_width=True):
 
         if not prompt.strip():
+
             st.warning("Please enter a prompt first.")
 
         else:
@@ -597,11 +751,7 @@ elif menu == "Prompt Improver":
 
             except Exception as e:
 
-                st.error(f"Gemini Improver Error: {e}")
-
-                st.warning(
-                    "Using the local improver instead."
-                )
+                friendly_gemini_message(e, "improver")
 
                 result = improve_prompt(prompt)
 
@@ -637,9 +787,9 @@ elif menu == "Prompt History":
         "analyzed and improved prompts."
     )
 
-    history = get_history(HISTORY_SESSION_ID)
-
     st.divider()
+
+    history = get_history(HISTORY_SESSION_ID)
 
     if not history:
 
@@ -650,18 +800,24 @@ elif menu == "Prompt History":
 
     else:
 
-        col1, col2 = st.columns([3, 1])
+        col1, col2 = st.columns([3, 1], gap="large")
 
         with col1:
-            st.subheader(f"Your Saved Activities ({len(history)})")
+            st.subheader(
+                f"Your Saved Activities ({len(history)})"
+            )
 
         with col2:
             if st.button(
                 "🗑️ Clear My History",
-                key="clear_prompt_history"
+                key="clear_prompt_history",
+                use_container_width=True
             ):
+
                 clear_history(HISTORY_SESSION_ID)
+
                 st.success("Your history has been cleared!")
+
                 st.rerun()
 
         st.divider()
@@ -672,8 +828,10 @@ elif menu == "Prompt History":
 
             if item["task"] == "Generator":
                 task_icon = "✨"
+
             elif item["task"] == "Analyzer":
                 task_icon = "🔍"
+
             else:
                 task_icon = "🚀"
 
@@ -696,6 +854,7 @@ elif menu == "Prompt History":
                 st.write(item["user_input"])
 
                 if item["task"] == "Generator":
+
                     st.caption(
                         f"Category: {item['category']} | "
                         f"Tone: {item['tone']}"
