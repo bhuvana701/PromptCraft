@@ -2,11 +2,20 @@
 import streamlit as st
 import re
 import html
+import uuid
 
 from modules.generator import generate_prompt
 from modules.analyzer import analyze_prompt
 from modules.improver import improve_prompt
 from modules.ai_generator import generate_ai_response
+
+from modules.history import (
+    initialize_database,
+    add_history,
+    get_history,
+    delete_history,
+    clear_history
+)
 
 
 # --------------------------------------------------
@@ -18,6 +27,18 @@ st.set_page_config(
     page_icon="✨",
     layout="wide"
 )
+
+
+# --------------------------------------------------
+# PROMPT HISTORY DATABASE CONFIGURATION
+# --------------------------------------------------
+
+initialize_database()
+
+if "history_session_id" not in st.session_state:
+    st.session_state["history_session_id"] = str(uuid.uuid4())
+
+HISTORY_SESSION_ID = st.session_state["history_session_id"]
 
 
 # --------------------------------------------------
@@ -141,7 +162,7 @@ h1, h2, h3, h4, p, li, label {
     box-shadow: 0 3px 12px rgba(40, 30, 90, 0.05);
 }
 
-/* SUCCESS MESSAGE - DARK GREEN THEME */
+/* Success message */
 
 [data-testid="stAlert"] {
     background-color: #14532D !important;
@@ -258,7 +279,8 @@ menu = st.sidebar.radio(
         "Home",
         "Prompt Generator",
         "Prompt Analyzer",
-        "Prompt Improver"
+        "Prompt Improver",
+        "Prompt History"
     ]
 )
 
@@ -421,6 +443,17 @@ elif menu == "Prompt Generator":
 
             st.session_state["generator_result"] = result
 
+            add_history(
+                task="Generator",
+                user_input=topic,
+                result=result,
+                session_id=HISTORY_SESSION_ID,
+                category=category,
+                tone=tone
+            )
+
+            st.success("Your activity has been saved to Prompt History!")
+
     if "generator_result" in st.session_state:
 
         display_result(
@@ -481,6 +514,15 @@ elif menu == "Prompt Analyzer":
 
                 st.session_state["analyzer_result"] = result
                 st.session_state["analyzer_local"] = True
+
+            add_history(
+                task="Analyzer",
+                user_input=prompt,
+                result=result,
+                session_id=HISTORY_SESSION_ID
+            )
+
+            st.success("Your analysis has been saved to Prompt History!")
 
     if "analyzer_result" in st.session_state:
 
@@ -565,12 +607,128 @@ elif menu == "Prompt Improver":
 
             st.session_state["improver_result"] = result
 
+            add_history(
+                task="Improver",
+                user_input=prompt,
+                result=result,
+                session_id=HISTORY_SESSION_ID
+            )
+
+            st.success("Your activity has been saved to Prompt History!")
+
     if "improver_result" in st.session_state:
 
         display_result(
             st.session_state["improver_result"],
             "improved_prompt.txt"
         )
+
+
+# --------------------------------------------------
+# PROMPT HISTORY
+# --------------------------------------------------
+
+elif menu == "Prompt History":
+
+    st.header("🕘 Prompt History")
+
+    st.write(
+        "View and manage your previously generated, "
+        "analyzed and improved prompts."
+    )
+
+    history = get_history(HISTORY_SESSION_ID)
+
+    st.divider()
+
+    if not history:
+
+        st.info(
+            "Your Prompt History is empty. "
+            "Generate, analyze or improve a prompt to see it here."
+        )
+
+    else:
+
+        col1, col2 = st.columns([3, 1])
+
+        with col1:
+            st.subheader(f"Your Saved Activities ({len(history)})")
+
+        with col2:
+            if st.button(
+                "🗑️ Clear My History",
+                key="clear_prompt_history"
+            ):
+                clear_history(HISTORY_SESSION_ID)
+                st.success("Your history has been cleared!")
+                st.rerun()
+
+        st.divider()
+
+        for item in history:
+
+            record_id = item["id"]
+
+            if item["task"] == "Generator":
+                task_icon = "✨"
+            elif item["task"] == "Analyzer":
+                task_icon = "🔍"
+            else:
+                task_icon = "🚀"
+
+            history_title = (
+                f"{task_icon} {item['task']} – "
+                f"{item['user_input'][:55]}"
+            )
+
+            if len(item["user_input"]) > 55:
+                history_title += "..."
+
+            with st.expander(history_title):
+
+                st.caption(
+                    f"📅 Created on: {item['created_at']}"
+                )
+
+                st.markdown("**Original Input**")
+
+                st.write(item["user_input"])
+
+                if item["task"] == "Generator":
+                    st.caption(
+                        f"Category: {item['category']} | "
+                        f"Tone: {item['tone']}"
+                    )
+
+                st.markdown("**Saved Result**")
+
+                st.code(
+                    item["result"],
+                    language=None
+                )
+
+                st.download_button(
+                    label="⬇️ Download This Result",
+                    data=item["result"],
+                    file_name=f"promptcraft_history_{record_id}.txt",
+                    mime="text/plain",
+                    key=f"download_history_{record_id}"
+                )
+
+                if st.button(
+                    "🗑️ Delete This Record",
+                    key=f"delete_history_{record_id}"
+                ):
+
+                    delete_history(
+                        record_id,
+                        HISTORY_SESSION_ID
+                    )
+
+                    st.success("Record deleted successfully!")
+
+                    st.rerun()
 
 
 # --------------------------------------------------
