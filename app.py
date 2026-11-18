@@ -141,6 +141,25 @@ h1, h2, h3, h4, p, li, label {
     box-shadow: 0 3px 12px rgba(40, 30, 90, 0.05);
 }
 
+/* SUCCESS MESSAGE - DARK GREEN THEME */
+
+[data-testid="stAlert"] {
+    background-color: #14532D !important;
+    border: 1px solid #166534 !important;
+    border-radius: 10px !important;
+}
+
+[data-testid="stAlert"] p,
+[data-testid="stAlert"] div,
+[data-testid="stAlert"] span {
+    color: #DCFCE7 !important;
+}
+
+[data-testid="stAlert"] svg {
+    color: #86EFAC !important;
+    fill: #86EFAC !important;
+}
+
 /* Footer */
 
 .footer {
