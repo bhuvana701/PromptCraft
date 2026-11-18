@@ -1,4 +1,5 @@
 
+import time
 from google import genai
 
 
@@ -11,13 +12,9 @@ def generate_ai_response(
 ):
     # Check API key
     if not api_key:
-        raise ValueError("Gemini API key is missing. Check secrets.toml.")
-
-    # Connect to Gemini with a 30-second timeout
-    client = genai.Client(
-        api_key=api_key,
-        http_options={"timeout": 120000}
-    )
+        raise ValueError(
+            "Gemini API key is missing. Check secrets.toml."
+        )
 
     # Prepare instructions
     if task == "generate":
@@ -77,14 +74,39 @@ def generate_ai_response(
     else:
         raise ValueError("Invalid task selected.")
 
-    # Send request to Gemini
-    response = client.models.generate_content(
-        model="gemini-3.5-flash-lite",
-        contents=instruction
+    # Connect to Gemini
+    client = genai.Client(
+        api_key=api_key,
+        http_options={"timeout": 120000}
     )
 
-    # Validate response
-    if not response.text:
-        raise ValueError("Gemini returned an empty response.")
+    # Automatic retry settings
+    max_attempts = 3
 
-    return response.text
+    for attempt in range(max_attempts):
+        try:
+            response = client.models.generate_content(
+                model="gemini-3.5-flash-lite",
+                contents=instruction
+            )
+
+            if not response.text:
+                raise ValueError("Gemini returned an empty response.")
+
+            return response.text
+
+        except Exception as e:
+            if attempt < max_attempts - 1:
+                wait_time = 2 ** attempt
+
+                print(
+                    f"Gemini attempt {attempt + 1} failed. "
+                    f"Retrying in {wait_time} seconds..."
+                )
+
+                time.sleep(wait_time)
+
+            else:
+                raise RuntimeError(
+                    f"Gemini failed after {max_attempts} attempts: {e}"
+                ) from e
