@@ -188,7 +188,7 @@ h3 {
     line-height: 1.7;
 }
 
-/* Result cards - COMPACT PROFESSIONAL DESIGN */
+/* Result cards */
 
 .result-box {
     background-color: #FFFFFF;
@@ -239,7 +239,7 @@ h3 {
     color: #252545;
 }
 
-/* SUCCESS NOTIFICATION - PURPLE BACKGROUND + WHITE TEXT */
+/* SUCCESS NOTIFICATION */
 
 div[data-testid="stAlert"]:has([data-testid="stAlertContentSuccess"]) {
     background-color: #7055DC !important;
@@ -353,17 +353,18 @@ def display_result(result, filename):
 
     formatted_result = str(result)
 
-    # Add extra spacing between Evaluation Matrix heading
-    # and the table below it.
+    # Add extra spacing after the Evaluation Matrix heading.
+    # Supports headings such as:
+    # ### Evaluation Matrix
+    # ### **1. Evaluation Matrix**
 
     formatted_result = re.sub(
-        r"(###\s+Evaluation Matrix\s*\n)(\s*\|)",
-        r"\1\n\2",
-        formatted_result,
-        flags=re.IGNORECASE
+        r"(?im)(^#{1,6}\s*(?:\*\*)?\s*\d*\.?\s*Evaluation Matrix\s*(?:\*\*)?\s*$)\n(?=\s*\|)",
+        r"\1\n\n",
+        formatted_result
     )
 
-    # Render Markdown formatting properly.
+    # Render Markdown properly.
 
     with st.container(border=True):
         st.markdown(formatted_result)
@@ -793,10 +794,23 @@ elif menu == "Prompt History":
 
     if not history:
 
-        st.info(
-            "Your Prompt History is empty. "
-            "Generate, analyze or improve a prompt to see it here."
-        )
+        # Custom empty history message
+
+        st.markdown("""
+        <div style="
+            background-color: #EAE4FF;
+            color: #49358F;
+            border: 1px solid #CFC2FF;
+            border-left: 5px solid #7055DC;
+            border-radius: 10px;
+            padding: 16px 20px;
+            font-size: 15px;
+            font-weight: 500;
+        ">
+            Your Prompt History is empty.
+            Generate, analyze or improve a prompt to see it here.
+        </div>
+        """, unsafe_allow_html=True)
 
     else:
 
